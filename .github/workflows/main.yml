@@ -1,36 +1,19 @@
-name: Build OpenList Core
-
-on: [push, workflow_dispatch]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.22
-
       - name: Compile OpenList to AAR
         run: |
-          # 1. 初始化 Go 模块
+          # 1. 创建 go.mod 并设置 Replace
           go mod init openlist-core
-          # 2. 下载 OpenList 核心库
-          go get github.com/OpenListTeam/OpenList
-          # 3. 安装 gomobile 工具
+          
+          # 2. 关键步骤：强行把这个混乱的路径指向正确的仓库
+          go mod edit -replace github.com/Xhofe/alist=github.com/OpenListTeam/OpenList@v1.0.6
+          
+          # 3. 拉取依赖
+          go mod tidy
+          
+          # 4. 安装 gomobile
           go install golang.org/x/mobile/cmd/gomobile@latest
           go install golang.org/x/mobile/cmd/gobind@latest
           gomobile init
-          # 4. 编译成 Android 库 (AAR)
-          # 注意：这里会把 OpenList 的核心函数转换成 Java 可调用的接口
-          gomobile bind -target=android github.com/OpenListTeam/OpenList/...
-
-      - name: Upload Core Library
-        uses: actions/upload-artifact@v4
-        with:
-          name: OpenList-AAR
-          path: |
-            *.aar
-            *.jar
+          
+          # 5. 编译 (注意：这里要指向真正的代码包路径)
+          # 因为它源码里写的是 github.com/Xhofe/alist，所以我们要编译这个路径
+          gomobile bind -target=android github.com/Xhofe/alist/alistlib/...
