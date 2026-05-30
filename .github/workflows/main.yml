@@ -1,0 +1,6 @@
+# 把原来下载 alist 的命令改为下载 openlist 的源码
+git clone https://github.com/OpenListTeam/OpenList openlist-core
+cd openlist-core
+# 进行编译
+go build -o openlist
+
