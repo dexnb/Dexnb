@@ -1,19 +1,8 @@
-      - name: Compile OpenList to AAR
+      - name: Locate Source Path
         run: |
-          # 1. 创建 go.mod 并设置 Replace
           go mod init openlist-core
-          
-          # 2. 关键步骤：强行把这个混乱的路径指向正确的仓库
           go mod edit -replace github.com/Xhofe/alist=github.com/OpenListTeam/OpenList@v1.0.6
-          
-          # 3. 拉取依赖
           go mod tidy
-          
-          # 4. 安装 gomobile
-          go install golang.org/x/mobile/cmd/gomobile@latest
-          go install golang.org/x/mobile/cmd/gobind@latest
-          gomobile init
-          
-          # 5. 编译 (注意：这里要指向真正的代码包路径)
-          # 因为它源码里写的是 github.com/Xhofe/alist，所以我们要编译这个路径
-          gomobile bind -target=android github.com/Xhofe/alist/alistlib/...
+          echo "--- 正在扫描项目真实路径 ---"
+          # 使用 find 命令列出所有包含 alistlib 或 main 的目录
+          find . -maxdepth 4 -name "*.go" | grep -E "alistlib|main"
